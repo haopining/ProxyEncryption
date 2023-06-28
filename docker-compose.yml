@@ -1,0 +1,46 @@
+version: "3.0"
+
+services:
+  proxy-sender:
+    restart: always
+    build: .
+    volumes:
+      - ./server:/usr/src
+      - /usr/src/node_modules
+    env_file:
+      - .env
+    ports:
+      - "8080:${proxy_server_port}"
+
+  base-server:
+    restart: always
+    build: .
+    volumes:
+      - ./server:/usr/src
+      - /usr/src/node_modules
+    env_file:
+      - .env
+    entrypoint: "nodemon target.js"
+
+  proxy-client:
+    restart: always
+    build: .
+    volumes:
+      - ./client:/usr/src
+      - /usr/src/node_modules
+    env_file:
+      - .env
+    ports:
+      - "1337:${proxy_client_port}"
+
+  redis:
+    restart: always
+    image: redis:7-alpine
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=local:redis:6379
+    ports:
+    - "8081:8081"
